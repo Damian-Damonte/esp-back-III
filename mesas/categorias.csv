@@ -1,0 +1,7 @@
+CategoriaCodigo,CategoriaNombre,ProductoCodigo,ProductoNombre,PrecioActual,CantidadActual
+001,Electrodomésticos,001-001,Lavadora,500,10
+001,Electrodomésticos,001-002,Refrigerador,600,2
+002,Muebles,002-001,Sofá,300,4
+002,Muebles,002-002,Mesa de comedor,150,5
+003,Herramientas,003-001,Taladro,80,1
+003,Herramientas,003-002,Martillo,20,2
