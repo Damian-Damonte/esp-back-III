@@ -1,5 +1,7 @@
 package main
 
+// Ejercicio PG clase 7 A usando canales
+
 import (
 	"fmt"
 )
