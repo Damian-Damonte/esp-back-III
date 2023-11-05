@@ -1,1 +1,1 @@
-Cada branch es una clase de la especialización Backend III.
+Cada branch es una clase de la especialización Backend III
