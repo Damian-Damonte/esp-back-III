@@ -5,8 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// var Empleados
-
 type Empleado struct {
 	Id     int    `json:"id"`
 	Nombre string `json:"nombre"`
