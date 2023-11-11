@@ -38,7 +38,8 @@ func getProductos(ctx *gin.Context) {
 func saveProducto(ctx *gin.Context) {
 	var producto Producto
 	if err := ctx.ShouldBindJSON(&producto); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	for _,p := range productos {
