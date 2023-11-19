@@ -13,10 +13,10 @@ var (
 )
 
 type Repository interface {
-	Create(ctx context.Context, producto domain.Producto) (domain.Producto, error)
-	GetAll(ctx context.Context) ([]domain.Producto, error)
-	GetByID(ctx context.Context, id string) (domain.Producto, error)
-	Update(ctx context.Context, producto domain.Producto, id string) (domain.Producto, error)
+	Create(ctx context.Context, producto domain.Producto) (*domain.Producto, error)
+	GetAll(ctx context.Context) (*[]domain.Producto, error)
+	GetByID(ctx context.Context, id string) (*domain.Producto, error)
+	Update(ctx context.Context, producto domain.Producto, id string) (*domain.Producto, error)
 	Delete(ctx context.Context, id string) error
 }
 
@@ -29,30 +29,30 @@ func NewMemoryRepository(storage storage.Storage) Repository {
 }
 
 // Create ....
-func (r *repository) Create(ctx context.Context, producto domain.Producto) (domain.Producto, error) {
-	producto, err := r.storage.Create(ctx, producto)
+func (r *repository) Create(ctx context.Context, producto domain.Producto) (*domain.Producto, error) {
+	product, err := r.storage.Create(ctx, producto)
 	if err != nil {
-		return domain.Producto{}, err
+		return nil, err
 	}
 
-	return producto, nil
+	return product, nil
 }
 
 // GetAll...
-func (r *repository) GetAll(ctx context.Context) ([]domain.Producto, error) {
+func (r *repository) GetAll(ctx context.Context) (*[]domain.Producto, error) {
 	products, err := r.storage.GetAll(ctx)
 	if err != nil {
-		return []domain.Producto{}, err
+		return nil, err
 	}
 
 	return products, nil
 }
 
 // GetByID .....
-func (r *repository) GetByID(ctx context.Context, id string) (domain.Producto, error) {
+func (r *repository) GetByID(ctx context.Context, id string) (*domain.Producto, error) {
 	result, err := r.storage.GetByID(ctx, id)
 	if err != nil {
-		return domain.Producto{}, err
+		return nil, err
 	}
 
 	return result, nil
@@ -62,10 +62,10 @@ func (r *repository) GetByID(ctx context.Context, id string) (domain.Producto, e
 func (r *repository) Update(
 	ctx context.Context,
 	producto domain.Producto,
-	id string) (domain.Producto, error) {
+	id string) (*domain.Producto, error) {
 	result, err := r.storage.Update(ctx, producto, id)
 	if err != nil {
-		return domain.Producto{}, err
+		return nil, err
 	}
 
 	return result, nil	

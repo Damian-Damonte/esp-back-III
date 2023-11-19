@@ -24,10 +24,10 @@ var (
 
 type Storage interface {
 	Inicializacion()
-	GetAll(ctx context.Context)([]domain.Producto, error)
-	GetByID(ctx context.Context, id string) (domain.Producto, error)
-	Create(ctx context.Context, producto domain.Producto) (domain.Producto, error)
-	Update(ctx context.Context, producto domain.Producto,id string) (domain.Producto, error)
+	GetAll(ctx context.Context)(*[]domain.Producto, error)
+	GetByID(ctx context.Context, id string) (*domain.Producto, error)
+	Create(ctx context.Context, producto domain.Producto) (*domain.Producto, error)
+	Update(ctx context.Context, producto domain.Producto,id string) (*domain.Producto, error)
 	Delete(ctx context.Context, id string) error
 }
 
@@ -56,15 +56,15 @@ func (s *jsonStorage) Inicializacion(){
 	s.Storage = productos
 }
 
-func (s *jsonStorage) GetAll(ctx context.Context, ) ([]domain.Producto, error) {
+func (s *jsonStorage) GetAll(ctx context.Context, ) (*[]domain.Producto, error) {
 	if len(s.Storage) == 0 {
-		return []domain.Producto{}, ErrEmpty
+		return nil, ErrEmpty
 	}
 
-	return s.Storage, nil
+	return &s.Storage, nil
 }
 
-func (s *jsonStorage) GetByID(ctx context.Context, id string) (domain.Producto, error) {
+func (s *jsonStorage) GetByID(ctx context.Context, id string) (*domain.Producto, error) {
 	var result domain.Producto
 	for _, value := range s.Storage {
 		if value.Id == id {
@@ -74,16 +74,32 @@ func (s *jsonStorage) GetByID(ctx context.Context, id string) (domain.Producto, 
 	}
 
 	if result.Id == "" {
-		return domain.Producto{}, ErrNotFound
+		return nil, ErrNotFound
 	}
 
-	return result, nil
+	return &result, nil
+}
+
+func (s *jsonStorage) Create(ctx context.Context, producto domain.Producto) (*domain.Producto, error) {
+	_, err := s.GetByID(ctx, producto.Id)
+	if err == nil {
+		return nil, ErrIdTaken
+	}
+
+	s.Storage = append(s.Storage, producto)
+
+	err = s.UpdateJsonFile()
+	if err != nil {
+		return nil, err
+	}
+
+	return &producto, nil
 }
 
 func (s *jsonStorage) Update(
 	ctx context.Context,
 	producto domain.Producto,
-	id string) (domain.Producto, error) {
+	id string) (*domain.Producto, error) {
 
 	var result domain.Producto
 	for key, value := range s.Storage {
@@ -96,15 +112,15 @@ func (s *jsonStorage) Update(
 	}
 
 	if result.Id == "" {
-		return domain.Producto{}, ErrNotFound
+		return nil, ErrNotFound
 	}
 
 	err := s.UpdateJsonFile()
 	if err != nil {
-		return domain.Producto{}, err
+		return nil, err
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 func (s *jsonStorage) Delete(ctx context.Context, id string) error {
@@ -127,22 +143,6 @@ func (s *jsonStorage) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
-}
-
-func (s *jsonStorage) Create(ctx context.Context, producto domain.Producto) (domain.Producto, error) {
-	_, err := s.GetByID(ctx, producto.Id)
-	if err == nil {
-		return domain.Producto{}, ErrIdTaken
-	}
-
-	s.Storage = append(s.Storage, producto)
-
-	err = s.UpdateJsonFile()
-	if err != nil {
-		return domain.Producto{}, err
-	}
-
-	return producto, nil
 }
 
 
