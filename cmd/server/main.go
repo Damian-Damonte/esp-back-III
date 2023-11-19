@@ -2,11 +2,11 @@ package main
 
 import (
 	"log"
-
 	handlerPing "github.com/aldogayaladh/go-web-1598/cmd/server/handler/ping"
 	handlerProducto "github.com/aldogayaladh/go-web-1598/cmd/server/handler/products"
 	"github.com/aldogayaladh/go-web-1598/internal/products"
 	"github.com/aldogayaladh/go-web-1598/pkg/jsonstorage"
+	"github.com/aldogayaladh/go-web-1598/pkg/sqlstorage"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -17,14 +17,19 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// JsonStorage
 	jsonStorage := jsonstorage.NewJsonStorage()
 	jsonStorage.Inicializacion()
+
+	// SqlStorage
+	sqlStorage := sqlstorage.NewSqlStorage()
+	sqlStorage.Inicializacion()
 
 	// Ping.
 	controllerPing := handlerPing.NewControllerPing()
 
 	// Products.
-	repostory := products.NewMemoryRepository(jsonStorage)
+	repostory := products.NewMemoryRepository(sqlStorage)
 	service := products.NewServiceProduct(repostory)
 	controllerProduct := handlerProducto.NewControllerProducts(service)
 

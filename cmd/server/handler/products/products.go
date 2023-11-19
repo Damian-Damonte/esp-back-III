@@ -102,7 +102,7 @@ func (c *Controller) HandlerUpdate() gin.HandlerFunc {
 		producto, err := c.service.Update(ctx, productRequest, idParam)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"message": err,
+				"message": err.Error(),
 			})
 			return
 		}
