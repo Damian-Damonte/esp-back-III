@@ -19,23 +19,27 @@ var (
 	ErrNotFound = errors.New("product not found")
 	ErrMarshal = errors.New("error convertir los productos a json")
 	ErrWriteFile = errors.New("error al escribir en el archivo")
+	ErrIdTaken = errors.New("ya existe un producto con el id seleccionado")
 )
 
 type Storage interface {
 	Inicializacion()
+	GetAll(ctx context.Context)([]domain.Producto, error)
 	GetByID(ctx context.Context, id string) (domain.Producto, error)
+	Create(ctx context.Context, producto domain.Producto) (domain.Producto, error)
 	Update(ctx context.Context, producto domain.Producto,id string) (domain.Producto, error)
+	Delete(ctx context.Context, id string) error
 }
 
-type storage struct {
+type jsonStorage struct {
 	Storage []domain.Producto
 }
 
 func NewStorage() Storage {
-	return &storage{}
+	return &jsonStorage{}
 }
 
-func (s *storage) Inicializacion(){
+func (s *jsonStorage) Inicializacion(){
 	productosJson, err := os.ReadFile(jsonFile)
 	if err != nil {
 		log.Fatal(err)
@@ -52,7 +56,15 @@ func (s *storage) Inicializacion(){
 	s.Storage = productos
 }
 
-func (s *storage) GetByID(ctx context.Context, id string) (domain.Producto, error) {
+func (s *jsonStorage) GetAll(ctx context.Context, ) ([]domain.Producto, error) {
+	if len(s.Storage) == 0 {
+		return []domain.Producto{}, ErrEmpty
+	}
+
+	return s.Storage, nil
+}
+
+func (s *jsonStorage) GetByID(ctx context.Context, id string) (domain.Producto, error) {
 	var result domain.Producto
 	for _, value := range s.Storage {
 		if value.Id == id {
@@ -68,7 +80,7 @@ func (s *storage) GetByID(ctx context.Context, id string) (domain.Producto, erro
 	return result, nil
 }
 
-func (s *storage) Update(
+func (s *jsonStorage) Update(
 	ctx context.Context,
 	producto domain.Producto,
 	id string) (domain.Producto, error) {
@@ -87,16 +99,64 @@ func (s *storage) Update(
 		return domain.Producto{}, ErrNotFound
 	}
 
+	err := s.UpdateJsonFile()
+	if err != nil {
+		return domain.Producto{}, err
+	}
+
+	return result, nil
+}
+
+func (s *jsonStorage) Delete(ctx context.Context, id string) error {
+	var result domain.Producto
+	for key, value := range s.Storage{
+		if value.Id == id {
+			result = s.Storage[key]
+			s.Storage = append(s.Storage[:key], s.Storage[key+1:]...)
+			break
+		}
+	}
+
+	if result.Id == "" {
+		return ErrNotFound
+	}
+
+	err := s.UpdateJsonFile()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *jsonStorage) Create(ctx context.Context, producto domain.Producto) (domain.Producto, error) {
+	_, err := s.GetByID(ctx, producto.Id)
+	if err == nil {
+		return domain.Producto{}, ErrIdTaken
+	}
+
+	s.Storage = append(s.Storage, producto)
+
+	err = s.UpdateJsonFile()
+	if err != nil {
+		return domain.Producto{}, err
+	}
+
+	return producto, nil
+}
+
+
+func (s *jsonStorage) UpdateJsonFile() error{
 	productosJson, err := json.Marshal(s.Storage)
 	if err != nil {
-		return domain.Producto{}, ErrMarshal
+		return ErrMarshal
 	}
 
 	err = os.WriteFile(jsonFile, productosJson, 0644)
 
 	if err != nil {
-		return domain.Producto{}, ErrWriteFile
+		return ErrWriteFile
 	}
 
-	return result, nil
+	return nil
 }

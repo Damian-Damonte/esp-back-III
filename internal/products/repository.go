@@ -3,8 +3,6 @@ package products
 import (
 	"context"
 	"errors"
-	"log"
-
 	"github.com/aldogayaladh/go-web-1598/internal/domain"
 	"github.com/aldogayaladh/go-web-1598/pkg/storage"
 )
@@ -23,40 +21,36 @@ type Repository interface {
 }
 
 type repository struct {
-	db []domain.Producto
-	jsonStorage storage.Storage
+	storage storage.Storage
 }
 
-// NewMemoryRepository ....
-func NewMemoryRepository(db []domain.Producto, jsonStorage storage.Storage) Repository {
-	return &repository{db: db, jsonStorage: jsonStorage}
+func NewMemoryRepository(storage storage.Storage) Repository {
+	return &repository{storage: storage}
 }
 
 // Create ....
 func (r *repository) Create(ctx context.Context, producto domain.Producto) (domain.Producto, error) {
-	r.db = append(r.db, producto)
+	producto, err := r.storage.Create(ctx, producto)
+	if err != nil {
+		return domain.Producto{}, err
+	}
+
 	return producto, nil
 }
 
 // GetAll...
 func (r *repository) GetAll(ctx context.Context) ([]domain.Producto, error) {
-
-	contenidoContext := ctx.Value("rol")
-
-	if contenidoContext != "" {
-		log.Println("El contenido del contexto es:", contenidoContext)
+	products, err := r.storage.GetAll(ctx)
+	if err != nil {
+		return []domain.Producto{}, err
 	}
 
-	if len(r.db) < 1 {
-		return []domain.Producto{}, ErrEmpty
-	}
-
-	return r.db, nil
+	return products, nil
 }
 
 // GetByID .....
 func (r *repository) GetByID(ctx context.Context, id string) (domain.Producto, error) {
-	result, err := r.jsonStorage.GetByID(ctx, id)
+	result, err := r.storage.GetByID(ctx, id)
 	if err != nil {
 		return domain.Producto{}, err
 	}
@@ -69,24 +63,7 @@ func (r *repository) Update(
 	ctx context.Context,
 	producto domain.Producto,
 	id string) (domain.Producto, error) {
-
-	// var result domain.Producto
-	// for key, value := range r.db {
-	// 	if value.Id == id {
-	// 		producto.Id = id
-	// 		r.db[key] = producto
-	// 		result = r.db[key]
-	// 		break
-	// 	}
-	// }
-
-	// if result.Id == "" {
-	// 	return domain.Producto{}, ErrNotFound
-	// }
-
-	// return result, nil
-
-	result, err := r.jsonStorage.Update(ctx, producto, id)
+	result, err := r.storage.Update(ctx, producto, id)
 	if err != nil {
 		return domain.Producto{}, err
 	}
@@ -96,17 +73,9 @@ func (r *repository) Update(
 
 // Delete ...
 func (r *repository) Delete(ctx context.Context, id string) error {
-	var result domain.Producto
-	for key, value := range r.db {
-		if value.Id == id {
-			result = r.db[key]
-			r.db = append(r.db[:key], r.db[key+1:]...)
-			break
-		}
-	}
-
-	if result.Id == "" {
-		return ErrNotFound
+	err := r.storage.Delete(ctx, id)
+	if err != nil {
+		return err
 	}
 
 	return nil
