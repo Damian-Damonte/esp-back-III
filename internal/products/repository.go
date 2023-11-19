@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/aldogayaladh/go-web-1598/internal/domain"
-	"github.com/aldogayaladh/go-web-1598/pkg/storage"
+	"github.com/aldogayaladh/go-web-1598/pkg"
 )
 
 var (
@@ -21,10 +21,10 @@ type Repository interface {
 }
 
 type repository struct {
-	storage storage.Storage
+	storage pkg.Storage
 }
 
-func NewMemoryRepository(storage storage.Storage) Repository {
+func NewMemoryRepository(storage pkg.Storage) Repository {
 	return &repository{storage: storage}
 }
 

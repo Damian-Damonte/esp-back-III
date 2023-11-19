@@ -2,10 +2,11 @@ package main
 
 import (
 	"log"
+
 	handlerPing "github.com/aldogayaladh/go-web-1598/cmd/server/handler/ping"
 	handlerProducto "github.com/aldogayaladh/go-web-1598/cmd/server/handler/products"
 	"github.com/aldogayaladh/go-web-1598/internal/products"
-	"github.com/aldogayaladh/go-web-1598/pkg/storage"
+	"github.com/aldogayaladh/go-web-1598/pkg/jsonstorage"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -13,10 +14,10 @@ import (
 func main() {
 
 	if err := godotenv.Load(); err != nil {
-    log.Fatal(err)
-  }
+		log.Fatal(err)
+	}
 
-	jsonStorage := storage.NewStorage()
+	jsonStorage := jsonstorage.NewJsonStorage()
 	jsonStorage.Inicializacion()
 
 	// Ping.

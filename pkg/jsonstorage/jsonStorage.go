@@ -1,4 +1,4 @@
-package storage
+package jsonstorage
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"errors"
 	"log"
 	"os"
-
 	"github.com/aldogayaladh/go-web-1598/internal/domain"
+	"github.com/aldogayaladh/go-web-1598/pkg"
 )
 
 const (
@@ -15,31 +15,22 @@ const (
 )
 
 var (
-	ErrEmpty    = errors.New("empty list")
-	ErrNotFound = errors.New("product not found")
-	ErrMarshal = errors.New("error convertir los productos a json")
+	ErrEmpty     = errors.New("empty list")
+	ErrNotFound  = errors.New("product not found")
+	ErrMarshal   = errors.New("error convertir los productos a json")
 	ErrWriteFile = errors.New("error al escribir en el archivo")
-	ErrIdTaken = errors.New("ya existe un producto con el id seleccionado")
+	ErrIdTaken   = errors.New("ya existe un producto con el id seleccionado")
 )
-
-type Storage interface {
-	Inicializacion()
-	GetAll(ctx context.Context)(*[]domain.Producto, error)
-	GetByID(ctx context.Context, id string) (*domain.Producto, error)
-	Create(ctx context.Context, producto domain.Producto) (*domain.Producto, error)
-	Update(ctx context.Context, producto domain.Producto,id string) (*domain.Producto, error)
-	Delete(ctx context.Context, id string) error
-}
 
 type jsonStorage struct {
 	Storage []domain.Producto
 }
 
-func NewStorage() Storage {
+func NewJsonStorage() pkg.Storage {
 	return &jsonStorage{}
 }
 
-func (s *jsonStorage) Inicializacion(){
+func (s *jsonStorage) Inicializacion() {
 	productosJson, err := os.ReadFile(jsonFile)
 	if err != nil {
 		log.Fatal(err)
@@ -56,7 +47,7 @@ func (s *jsonStorage) Inicializacion(){
 	s.Storage = productos
 }
 
-func (s *jsonStorage) GetAll(ctx context.Context, ) (*[]domain.Producto, error) {
+func (s *jsonStorage) GetAll(ctx context.Context) (*[]domain.Producto, error) {
 	if len(s.Storage) == 0 {
 		return nil, ErrEmpty
 	}
@@ -125,7 +116,7 @@ func (s *jsonStorage) Update(
 
 func (s *jsonStorage) Delete(ctx context.Context, id string) error {
 	var result domain.Producto
-	for key, value := range s.Storage{
+	for key, value := range s.Storage {
 		if value.Id == id {
 			result = s.Storage[key]
 			s.Storage = append(s.Storage[:key], s.Storage[key+1:]...)
@@ -145,8 +136,7 @@ func (s *jsonStorage) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-
-func (s *jsonStorage) UpdateJsonFile() error{
+func (s *jsonStorage) UpdateJsonFile() error {
 	productosJson, err := json.Marshal(s.Storage)
 	if err != nil {
 		return ErrMarshal
