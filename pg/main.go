@@ -46,6 +46,8 @@ func authMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		ctx.Writer.Written();
+
 		ctx.Next()
 
 		fmt.Println("Despues")
